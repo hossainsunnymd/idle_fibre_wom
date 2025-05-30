@@ -10,7 +10,6 @@ const searchField = ref(["name", "price", "unit", "mobile"]);
 const headers = [
     { text: "No", value: "customId" },
     { text: "Name", value: "name" },
-    // { text: "Address", value: "address" },
     { text: "Unit", value: "unit" },
     { text: "Mobile", value: "mobile"},
     { text: "Action", value: "action" },
@@ -76,7 +75,7 @@ if(page.props.flash.status===true){
             </template>
 
         </EasyDataTable>
-        
+
     </div>
 </template>
 

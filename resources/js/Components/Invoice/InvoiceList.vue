@@ -1,8 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import InvoiceDetails from "./InvoiceDetails.vue";
-// import InvoiceAllDetails from "./InvoiceAllDetails.vue";
-import { Link, usePage, useForm, router } from "@inertiajs/vue3";
+import { Link, usePage, router } from "@inertiajs/vue3";
 import { createToaster } from "@meforma/vue-toaster";
 import InvoiceDetailsList from "./InvoiceDetailsList.vue";
 
@@ -14,7 +13,7 @@ const page = usePage();
 
 const detail=ref(false);
 
-const searchValue = ref();
+const searchValue = ref("");
 const searchField = ref(["customer.name", "id"]);
 const headers = [
   { text: "Invoice no", value: "id" },
@@ -38,10 +37,9 @@ const deleteInvoice = (id) => {
 
 if (page.props.flash.status === true) {
   toaster.success(page.props.flash.message);
-}else if (page.props.flash.status === false) {
+} else if (page.props.flash.status === false) {
   toaster.error(page.props.flash.message);
 }
-
 
 const showDetails = (id) => {
   show.value = !show.value;
@@ -49,13 +47,14 @@ const showDetails = (id) => {
 };
 
 const showAllDetails = () => {
-    detail.value = !detail.value
-}
+  detail.value = !detail.value;
+};
+
 const fromDate = new URLSearchParams(window.location.search).get("fromDate");
 const toDate = new URLSearchParams(window.location.search).get("toDate");
 const searchForm = ref({
-  fromDate: fromDate?fromDate:"",
-  toDate: toDate?toDate:"",
+  fromDate: fromDate ? fromDate : "",
+  toDate: toDate ? toDate : "",
   customerId: "",
 });
 
@@ -72,143 +71,109 @@ const formatDate = (date) => {
 </script>
 
 <template>
-  <div class="p-4 bg-[#f8f8f8] ">
-    <div class="row">
-      <div class="col-md-6">
-        <h1 class="d-flex text-2xl font-bold mb-4">Work Order List / Invoices</h1>
-      </div>
+  <div class="p-4 bg-gray-100 min-h-screen">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">Work Order List / Invoices</h1>
     </div>
 
     <InvoiceDetails v-model:show="show" :customer="customer" />
     <InvoiceDetailsList v-model:show="detail" :items="items" />
 
-    <div class="row mb-1">
-      <div class="col-md-2 mb-1">
-          <input v-model="searchValue" type="text" class="mb-2 form-control form-control-sm" placeholder="Search Customer.."/>
-      </div>
-      <div class="col-md-2 mb-1">
-        <select v-model="searchForm.customerId" class="form-select form-select-sm">
-          <option value="" disabled selected>Select Customer</option>
-          <option v-for="customer in page.props.customerList" :key="customer.id" :value="customer.id">{{ customer.name }}</option>
-        </select>
-      </div>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input
+        v-model="searchValue"
+        type="text"
+        placeholder="Search Customer.."
+        class="sm:w-48 w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
-      <div class="col-md-2 mb-1">
-        <input v-model="searchForm.fromDate" type="date" class="form-control form-control-sm" />
-      </div>
-
-      <div class="col-md-2 mb-1">
-        <input v-model="searchForm.toDate" type="date" class="form-control form-control-sm" />
-      </div>
-
-      <div class="col-md-4 mb-2">
-        <button @click="search" class="btn btn-success btn-sm mr-1">Search Filter</button>
-        <Link href="/invoice-page" class="btn btn-secondary btn-sm mr-1">Clear Search</Link>
-        <button class="btn btn-primary btn-sm" @click="showAllDetails()">View all</button>
-      </div>
-    </div>
-
-    <div class="p-1 bg-[#f8f8f8]">
-      <div class="mb-4">
-        <Link href="/sale-page" class="bg-orange-600 hover:bg-orange-700 text-white px-2 py-2 square">Create Work Order</Link>
-      </div>
-      <EasyDataTable
-        buttons-pagination
-        alternating
-        :headers="headers"
-        :items="items"
-        :search-value="searchValue"
-        :search-field="searchField"
-        :rows-per-page="20"
+      <select
+        v-model="searchForm.customerId"
+        class="sm:w-48 w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <template #item-action="{ id }">
-          <button class="btn btn-outline-dark text-sm px-2 py-1 btn-sm" @click="showDetails(id)">
-            <i class="fa fa-eye"></i>
-          </button>
+        <option value="" disabled selected>Select Customer</option>
+        <option
+          v-for="customer in page.props.customerList"
+          :key="customer.id"
+          :value="customer.id"
+        >
+          {{ customer.name }}
+        </option>
+      </select>
 
-          <button v-if="page.props.user.role == 'superadmin'" class="btn btn-danger btn-sm" @click="deleteInvoice(id)"><i class="bi bi-trash"></i></button>
-        </template>
+      <input
+        v-model="searchForm.fromDate"
+        type="date"
+        class="sm:w-48 w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
-        <template #item-created_at="{ created_at }">
-          {{ formatDate(created_at) }}
-        </template>
-        
-      </EasyDataTable>
+      <input
+        v-model="searchForm.toDate"
+        type="date"
+        class="sm:w-48 w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <div class="flex flex-wrap gap-2 sm:flex-row flex-col sm:items-center">
+        <button
+          @click="search"
+          class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1.5 rounded transition"
+        >
+          Search Filter
+        </button>
+        <Link
+          href="/invoice-page"
+          class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-1.5 rounded transition inline-block text-center"
+        >
+          Clear Search
+        </Link>
+        <button
+          @click="showAllDetails()"
+          class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1.5 rounded transition"
+        >
+          View all
+        </button>
+      </div>
     </div>
+
+    <div class="mb-4">
+      <Link
+        href="/sale-page"
+        class="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded"
+      >
+        Create Work Order
+      </Link>
+    </div>
+
+    <EasyDataTable
+      buttons-pagination
+      alternating
+      :headers="headers"
+      :items="items"
+      :search-value="searchValue"
+      :search-field="searchField"
+      :rows-per-page="20"
+      class="text-sm"
+    >
+      <template #item-action="{ id }">
+        <button
+          class="border border-gray-700 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 transition mr-1"
+          @click="showDetails(id)"
+        >
+          <span class="material-icons text-gray-600 text-sm">visibility</span>
+        </button>
+
+        <button
+          v-if="page.props.user.role == 'superadmin'"
+          class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+          @click="deleteInvoice(id)"
+        >
+            <span class="material-icons text-sm">delete</span>
+        </button>
+      </template>
+
+      <template #item-created_at="{ created_at }">
+        {{ formatDate(created_at) }}
+      </template>
+    </EasyDataTable>
   </div>
 </template>
-
-
-<style scoped>
-
-/* General input styles for making elements smaller */
-.form-control-sm,
-.form-select-sm,
-.btn-sm {
-    padding: 4px 8px;      /* Smaller padding */
-    font-size: 10px;       /* Reduce font size */
-    line-height: 18px;     /* Adjust line height */
-    border-radius: 0px;    /* Smaller border radius */
-}
-
-/* Smaller select dropdown */
-.form-select-sm {
-    padding-right: 28px; /* Adjust padding for the dropdown icon */
-    font-size: 10px;
-}
-
-/* Reduce margin around buttons */
-.btn-sm {
-    margin-right: 3px;
-    margin-top: 0px;
-    margin-bottom: 2px;
-}
-
-/* Custom styling for the button groups */
-.btn-group-sm > .btn,
-.btn-group-sm > .btn-group {
-    padding: 4px 8px;
-    font-size: 14px;
-}
-
-/* Adjust column layout to make space more compact */
-.col-md-2,
-.col-md-4 {
-    padding-left: 15px;   /* Reduce padding between columns */
-    padding-right: 8px;
-    max-width: 100%;     /* Ensure inputs fit into grid */
-}
-
-/* Input fields should have less width for compact design */
-input[type="date"],
-select {
-    max-width: 100%;
-}
-
-/* Specific button styling */
-.btn-success.btn-sm,
-.btn-secondary.btn-sm,
-.btn-primary.btn-sm {
-    padding: 3px 10px;
-    font-size: 11px;
-}
-
-/* Adjust margin for the "View all" button */
-.btn-primary.my-1 {
-    margin-top: 4px;
-    margin-bottom: 4px;
-}
-
-/* Adjust EasyDataTable padding */
-.easy-data-table {
-    padding: 8px;
-}
-
-/* Optional: Add a custom smaller font size for table items */
-.easy-data-table td,
-.easy-data-table th {
-    font-size: 14px;
-}
-
-
-</style>

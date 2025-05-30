@@ -9,20 +9,20 @@ const props = defineProps({
 function formatNumberWithCommas(amount) {
     if (!amount) return '0';
 
-    // Convert amount to string and handle negative numbers
     const num = Math.abs(amount).toString();
 
-    // Check if it needs to be formatted with thousands and lakhs
     if (num.length > 3) {
-        const lastThreeDigits = num.substring(num.length - 3); // Get the last three digits
-        const otherNumbers = num.substring(0, num.length - 3); // Get the rest of the number
+        const lastThreeDigits = num.slice(-3);
+        let otherNumbers = num.slice(0, num.length - 3);
+        let formatted = '';
+        while (otherNumbers.length > 2) {
 
-        // Format the number with commas based on Indian number system (lakh, thousand)
-        const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThreeDigits;
-        return (amount < 0 ? '-' : '') + formatted;
+            formatted = ',' + otherNumbers.slice(-2) + formatted;
+            otherNumbers = otherNumbers.slice(0, otherNumbers.length - 2);
+        }
+        formatted = otherNumbers + formatted;
+        return (amount < 0 ? '-' : '') + formatted + ',' + lastThreeDigits;
     }
-
-    // If the number is less than a thousand, return it as is
     return (amount < 0 ? '-' : '') + num;
 }
 
@@ -30,135 +30,178 @@ const emit = defineEmits(["update:show"]);
 
 const printInvoice = () => {
     const printContent = document.getElementById("print-invoice").innerHTML;
+    const originalContent = document.body.innerHTML;
 
-    const printDiv = document.createElement("div");
-    printDiv.innerHTML = printContent;
-
-    printDiv.style.position = "absolute";
-    printDiv.style.top = "0";
-    printDiv.style.left = "0";
-    printDiv.style.right = "0";
-    printDiv.style.bottom = "0";
-    printDiv.style.height = "100%";
-    printDiv.style.width = "100%";
-    printDiv.style.backgroundColor = "white";
-    printDiv.style.zIndex = "9999";
-    document.body.appendChild(printDiv);
+    document.body.innerHTML = printContent;
     window.print();
-
-    document.body.removeChild(printDiv);
+    document.body.innerHTML = originalContent;
+    location.reload();
 };
 
-// const formatDate = (date) => {
-//     props.customer.created_at = new Date(props.customer.created_at);
-//     return props.customer.created_at.toISOString().slice(0, 10);
-// }
 
-const formatDate = (date) => {
-    const createdAt = new Date(props.customer.created_at);
-    const day = String(createdAt.getDate()).padStart(2, '0'); // get day and add leading zero if needed
-    const month = String(createdAt.getMonth() + 1).padStart(2, '0'); // get month (months are 0-indexed) and add leading zero
-    const year = createdAt.getFullYear(); // get full year
-
-    return `${day}-${month}-${year}`;
-}
 </script>
 
 <template>
     <div
         v-if="show"
-        class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 z-50"
+        class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50"
     >
         <div
-            class="bg-white border rounded-lg shadow-lg p-6 w-[1000px] overflow-y-auto"
+            class="bg-white border-2 border-black rounded-lg shadow-lg p-6 w-[1000px] max-h-[90vh] overflow-y-auto"
         >
-
-
             <div id="print-invoice" class="max-h-[400px] overflow-y-auto">
                 <div class="flex justify-between mb-4">
                     <div class="mt-4">
                         <h1 class="text-xl font-bold">Work Order</h1>
-                        <p>Date: {{ formatDate(props.customer.created_at) }}</p>
+                        <p>Date: {{ props.customer.created_at?new Date(props.customer.created_at).toLocaleDateString():"" }}</p>
                     </div>
                     <div class="font-bold">
-                        <img class="h-[90px]" src="../../Assets/img/logo.jpg" alt="Logo" />
+                        <img
+                            class="h-[90px]"
+                            src="../../Assets/img/logo.jpg"
+                            alt="Logo"
+                        />
                     </div>
                 </div>
-                
-                <!-- Bill To Information -->
+
                 <div class="mb-4 text-xl">
-                    <!-- <h2 class="text-xl font-bold">Bill To:</h2> -->
-                    <p><strong>Customer Name:</strong> {{ props.customer.customer.name }}</p>
-                    <p><strong>Mobile:</strong> {{ props.customer.customer.mobile }}</p>
+                    <p>
+                        <strong>Customer Name:</strong>
+                        {{ props.customer.customer.name }}
+                    </p>
+                    <p>
+                        <strong>Mobile:</strong>
+                        {{ props.customer.customer.mobile }}
+                    </p>
                     <p><strong>Invoice No:</strong> {{ props.customer.id }}</p>
-                    <p><strong>Delivery Date:</strong> {{customer.delivery_date ? new Date(props.customer.delivery_date).toLocaleDateString():'' }}</p>
-                    <p><strong>Delivery Place:</strong> {{ props.customer.delivery_place }}</p>
+                    <p>
+                        <strong>Delivery Date:</strong>
+                        {{
+                            props.customer.delivery_date
+                                ? new Date(
+                                      props.customer.delivery_date
+                                  ).toLocaleDateString()
+                                : ""
+                        }}
+                    </p>
+                    <p>
+                        <strong>Delivery Place:</strong>
+                        {{ props.customer.delivery_place }}
+                    </p>
                 </div>
 
-                <!-- Itemized List with Description, Weight, Size, Rate, Qty, and Order Price -->
-                <table class="w-full mb-4">
+                <table
+                    class="w-full mb-4 border-collapse border-2 border-black"
+                >
                     <thead>
-                        <tr>
-                            <th class="text-left">SL</th>
-                            <th class="text-left">Product Description</th>
-                            <th class="text-left">Weight</th>
-                            <th class="text-left">Size</th>
-                            <!-- <th class="text-left">Rate</th> -->
-                            <th class="text-left">Qty/Pcs</th>
-                            <th class="text-left">Qty/Kg</th>
-                            <!-- <th class="text-left">Order Price</th> -->
+                        <tr class="border border-black">
+                            <th class="p-2 border border-black text-left">
+                                SL
+                            </th>
+                            <th class="p-2 border border-black text-left">
+                                Product Description
+                            </th>
+                            <th class="p-2 border border-black text-left">
+                                Weight
+                            </th>
+                            <th class="p-2 border border-black text-left">
+                                Size
+                            </th>
+                            <th class="p-2 border border-black text-left">
+                                Qty/Pcs
+                            </th>
+                            <th class="p-2 border border-black text-left">
+                                Qty/Kg
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(product, index) in props.customer.invoice_products" :key="index">
-                            <td>{{ index + 1 }}</td>
-                            <td class="max-w-[300px] break-words  whitespace-normal">{{ product.product.decription }}</td> <!-- Display description here -->
-                            <td>{{ product.product.weight }}</td>
-                            <td>{{ product.product.size }}</td>
-                            <!-- <td>{{ product.rate }}</td> -->
-                            <td>{{ product.qty_by_pc }}</td>
-                            <td>{{ product.qty_by_kg }}</td>
-                            <!-- <td>{{ product.order_price }}</td> -->
+                        <tr
+                            v-for="(product, index) in props.customer
+                                .invoice_products"
+                            :key="index"
+                            class="border border-black"
+                        >
+                            <td class="p-2 border border-black">
+                                {{ index + 1 }}
+                            </td>
+                            <td
+                                class="p-2 border border-black max-w-[300px] break-words"
+                            >
+                                {{ product.product.decription }}
+                            </td>
+                            <td class="p-2 border border-black">
+                                {{ product.product.weight }}
+                            </td>
+                            <td class="p-2 border border-black">
+                                {{ product.product.size }}
+                            </td>
+                            <td class="p-2 border border-black">
+                                {{ product.qty_by_pc }}
+                            </td>
+                            <td class="p-2 border border-black">
+                                {{ product.qty_by_kg }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <!-- Total, Payable, Vat, Discount -->
                 <div class="mt-4 border-t pt-4">
                     <div class="flex">
-                        <button class="btn border-primary btn-sm font-normal border-2 mt-3">Total Order By Kg:
-                            <strong>{{ formatNumberWithCommas(props.customer.total_by_kg) }}</strong> Kg
+                        <button
+                            class="border-2 border-primary text-sm font-normal mt-3 px-4 py-1 rounded"
+                        >
+                            Total Order By Kg:
+                            <strong>{{
+                                formatNumberWithCommas(
+                                    props.customer.total_by_kg
+                                )
+                            }}</strong>
+                            Kg
                         </button>
                     </div>
-                    
                     <div class="flex">
-                        <button class="btn border-primary btn-sm font-normal border-2 mt-3">Total Order By Pcs:
-                            <strong>{{ formatNumberWithCommas(props.customer.total_by_pc) }}</strong> Pcs
+                        <button
+                            class="border-2 border-primary text-sm font-normal mt-3 px-4 py-1 rounded"
+                        >
+                            Total Order By Pcs:
+                            <strong>{{
+                                formatNumberWithCommas(
+                                    props.customer.total_by_pc
+                                )
+                            }}</strong>
+                            Pcs
                         </button>
                     </div>
-                    <div>
-                        <p ><strong class="text-xl">Note:</strong> {{ props.customer.note }}</p>
+
+                    <div class="mt-4">
+                        <p>
+                            <strong class="text-xl">Note:</strong>
+                            {{ props.customer.note }}
+                        </p>
                     </div>
-                    <div class="absolute bottom-0 left-0 right-0 flex justify-between items-end p-6">
-                        <p class="border-t border-black">Prepared By </p>
-                        <p class="border-t border-black">Checked By </p>
-                        <p class="border-t border-black">Received By </p>
-                        <p class="border-t border-black">Authorized By </p>
+
+                    <div
+                        class="flex justify-between mt-6 relative print:absolute print:bottom-0 print:left-0 print:right-0 print:px-6 print:pb-6"
+                    >
+                        <p class="border-t border-black pt-1">Prepared By</p>
+                        <p class="border-t border-black pt-1">Checked By</p>
+                        <p class="border-t border-black pt-1">Received By</p>
+                        <p class="border-t border-black pt-1">Authorized By</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex justify-between mt-6">
                 <button
                     @click="$emit('update:show', false)"
-                    class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
+                    class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
                 >
                     Close
                 </button>
                 <button
                     @click="[printInvoice(), $emit('update:show', false)]"
-                    class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                    class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
                     Print
                 </button>
@@ -166,73 +209,3 @@ const formatDate = (date) => {
         </div>
     </div>
 </template>
-
-<style scoped>
-.fixed {
-    position: fixed;
-}
-.bg-opacity-50 {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-.z-50 {
-    z-index: 50;
-}
-.bg-white {
-    background-color: white;
-}
-.border {
-    border: 2px solid black;
-}
-.rounded-lg {
-    border-radius: 8px;
-}
-.shadow-lg {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.p-6 {
-    padding: 1.5rem;
-}
-.mb-4 {
-    margin-bottom: 1rem;
-}
-.font-bold {
-    font-weight: bold;
-}
-.text-xl {
-    font-size: 1.25rem;
-}
-.text-left {
-    text-align: left;
-}
-.text-center {
-    text-align: center;
-}
-.text-right {
-    text-align: right;
-}
-.flex {
-    display: flex;
-}
-.justify-between {
-    justify-content: space-between;
-}
-.items-center {
-    align-items: center;
-}
-
-.hover\:bg-red-600:hover {
-    background-color: #e53e3e;
-}
-.hover\:bg-blue-600:hover {
-    background-color: #3182ce;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-th,td,tr {
-    padding: 8px;
-    border: 2px solid black;
-    text-align: left;
-}
-</style>

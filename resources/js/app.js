@@ -1,8 +1,5 @@
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
-import 'bootstrap/dist/css/bootstrap.css';
-import './Assets/css/main.css'
-import 'bootstrap';
 import Vue3EasyDataTable from 'vue3-easy-data-table';
 import 'vue3-easy-data-table/dist/style.css';
 import nProgress from 'nprogress';
