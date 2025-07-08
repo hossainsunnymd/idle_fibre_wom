@@ -2,57 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Helper\JWTToken;
-use App\Mail\OTPMail;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
 
-    public function loginPage() {
-        return Inertia::render('Auth/LoginPage');
-    }
-
-    public function userLogin(Request $request) {
-
-           $request->validate([
-               'email'=>'required|email',
-               'password'=>'required|min:8',
-           ]);
-           $count=User::where('email','=',$request->email)->first();
-           if($count != null && Hash::check($request->password,$count->password)){
-
-                $request->session()->put('email',$count->email);
-                $request->session()->put('user_id',$count->id);
-                $request->session()->put('name',$count->name);
-                $request->session()->put('role',$count->role);
-                $data=['message'=>'User login Successfully','status'=>true,'error'=>''];
-               if($count->role=='superadmin' || $count->role=='admin'){
-                return redirect('/invoice-page')->with( $data);
-               }
-
-           }else{
-
-                return redirect()->back()->with(['message'=>'User login Fail','status'=>'fail','error'=>'something went wrong']);
-           }
-    }
-
+    //user list page
     public function userPage(Request $request){
         $users=User::get();
         return Inertia::render('User/UserListPage',['users'=>$users]);
     }
+
+    //user save page
     public function userSavePage(Request $request){
         $id=$request->query('id');
         $user=User::where('id','=',$id)->first();
         return Inertia::render('User/UserSavePage',['users'=>$user]);
     }
 
-
+    //create user
     public function createUser(Request $request){
         $request->validate([
             'name'=>'required|string',
@@ -73,6 +44,7 @@ class UserController extends Controller
         return redirect()->back()->with(['status'=>true,'message'=>'User created successfully','error'=>'']);
     }
 
+    //update user
     public function updateUser(Request $request){
         $request->validate([
             'name'=>'required|string',
@@ -90,23 +62,20 @@ class UserController extends Controller
         User::where('id','=',$id)->update($data);
         return redirect()->back()->with(['status'=>true,'message'=>'User updated successfully','error'=>'']);
     }
-
+    
+    //delete user
     public function deleteUser(Request $request){
-        
+
         $id=$request->id;
         $role = User::where('id','=',$id)->first()->role;
         if($role=='superadmin'){
             return redirect()->back()->with(['status'=>false,'message'=>'You do not have permission to delete user','error'=>'']);
         }
         else{
-            
+
         User::where('id','=',$id)->delete();
         return redirect()->back()->with(['status'=>true,'message'=>'User deleted successfully','error'=>'']);
         };
     }
 
-    public function userLogout(Request $request) {
-        $request->session()->flush();
-        return redirect()->route('loginPage');
-   }
 }

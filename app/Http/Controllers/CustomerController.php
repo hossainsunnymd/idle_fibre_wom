@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use Exception;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Customer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
@@ -27,13 +28,13 @@ class CustomerController extends Controller
     // Create a new customer
     public function createCustomer(Request $request)
     {
-        $request->validate([
+        $validation = Validator::make($request->all(), [
             'name' => 'required|string',
-            'address' => 'nullable|string',
-            'unit' => 'nullable|string',
-            'mobile' => 'nullable|string',
-             // mobile is optional (nullable)
         ]);
+
+        if ($validation->fails()) {
+            return redirect()->back()->with(['error' => $validation->errors()]);
+        }
 
         try {
             Customer::create([
@@ -52,13 +53,14 @@ class CustomerController extends Controller
     // Update an existing customer
     public function updateCustomer(Request $request)
     {
-        
-        $request->validate([
+
+        $validation = Validator::make($request->all(), [
             'name' => 'required|string',
-            'address' => 'nullable|string',
-            'unit' => 'nullable|string',
-            'mobile' => 'nullable|string', // mobile is optional (nullable)
         ]);
+
+        if ($validation->fails()) {
+            return redirect()->back()->with(['error' => $validation->errors()]);
+        }
 
         try {
             $customerId = $request->input('id');
@@ -66,13 +68,13 @@ class CustomerController extends Controller
                 'name' => $request->input('name'),
                 'address' => $request->input('address'),
                 'unit' => $request->input('unit'),
-                'mobile' => $request->input('mobile'), // mobile can be null
+                'mobile' => $request->input('mobile'),
             ]);
 
             return redirect()->route('customerPage')->with(['status' => true, 'message' => 'Customer updated successfully']);
         } catch (Exception $e) {
             return redirect()->route('customerSavePage', ['id' => $request->input('id')])
-                             ->with(['status' => false, 'message' => 'Customer update failed']);
+                ->with(['status' => false, 'message' => 'Customer update failed']);
         }
     }
 

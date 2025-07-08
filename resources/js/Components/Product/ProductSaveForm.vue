@@ -1,9 +1,10 @@
 <script setup>
 import { router, useForm, usePage, Link } from "@inertiajs/vue3";
-import { reactive } from "vue";
+import { reactive,computed } from "vue";
 import { createToaster } from "@meforma/vue-toaster";
 const toaster = createToaster({ });
 
+const errors = computed(() => page.props.flash.error || {});
 const page = usePage();
 const status = reactive({
     title: "Create Product",
@@ -32,9 +33,6 @@ if (id !== 0 && page.props.product !== null) {
 }
 
 const submitForm = () => {
-    if (form.description === '') {
-        toaster.error('Name is required');
-    } else {
         form.post(URL, {
             preserveScroll: true,
             onSuccess: () => {
@@ -43,12 +41,11 @@ const submitForm = () => {
                     setTimeout(() => {
                         router.get("/product-page");
                     }, 500);
-                } else {
+                } else if(page.props.flash.status === false){
                     toaster.error(page.props.flash.message);
                 }
             },
         });
-    }
 };
 </script>
 
@@ -80,10 +77,9 @@ const submitForm = () => {
                     v-model="form.description"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500"
                     type="text"
-                    id="name"
-                    name="name"
                 />
                 <input type="hidden" v-model="form.id" name="id" />
+                <p v-if="errors.description" class="text-red-500 mt-2 text-sm">{{ errors.description[0] }}</p>
             </div>
 
             <div class="mb-4">
@@ -97,9 +93,8 @@ const submitForm = () => {
                     v-model="form.rate"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500"
                     type="text"
-                    id="price"
-                    name="price"
                 />
+                <p v-if="errors.rate" class="text-red-500 mt-2 text-sm">{{ errors.rate[0] }}</p>
             </div>
 
             <div class="mb-4">
@@ -113,8 +108,6 @@ const submitForm = () => {
                     v-model="form.size"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500"
                     type="text"
-                    id="size"
-                    name="size"
                 />
             </div>
 
@@ -129,8 +122,6 @@ const submitForm = () => {
                     v-model="form.weight"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-indigo-500"
                     type="text"
-                    id="weight"
-                    name="weight"
                 />
             </div>
 

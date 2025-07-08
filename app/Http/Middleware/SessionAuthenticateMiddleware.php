@@ -2,9 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
 use Closure;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class SessionAuthenticateMiddleware
@@ -23,6 +24,7 @@ class SessionAuthenticateMiddleware
             return redirect('/');
         }
         else{
+
             $request->headers->set('email',$email);
             $request->headers->set('user_id',$userId);
             return $next($request);

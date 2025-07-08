@@ -1,37 +1,34 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HistoryController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\ModeratorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\SessionAuthenticateMiddleware;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Middleware\SuperAdminMiddleware;
-use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\SessionAuthenticateMiddleware;
 
 
 
 
 // ================== User Routes ==================
 
-Route::post('/user-login', [UserController::class, 'userLogin'])->name('userLogin');
-Route::get('/user-logout', [UserController::class, 'userLogout'])->name('userLogout');
+Route::post('/user-login', [AuthController::class, 'userLogin'])->name('userLogin');
+Route::get('/user-logout', [AuthController::class, 'userLogout'])->name('userLogout');
 
 // User Page Routes
-Route::get('/', [UserController::class, 'loginPage'])->name('loginPage');
+Route::get('/', [AuthController::class, 'loginPage'])->name('loginPage');
 
 
 // ================== Middleware Protected Routes ==================
 Route::middleware([SessionAuthenticateMiddleware::class])->group(function () {
 
 
-    // Dashboard Routes
-    Route::get('/sale-page', [DashboardController::class, 'salePage'])->name('salePage');
+    // Sale page Routes
+    Route::get('/sale-page', [InvoiceController::class, 'salePage'])->name('salePage');
 
 
 

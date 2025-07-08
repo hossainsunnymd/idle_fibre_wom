@@ -21,7 +21,7 @@ class ProfileController extends Controller
             'password'=>'required|min:8',
         ]);
         $userId=$request->header('id');
-        $profile=User::where('id','=',$userId)->update([
+        User::where('id','=',$userId)->update([
             'name'=>$request->name,
             'email'=>$request->email,
             'mobile'=>$request->mobile,

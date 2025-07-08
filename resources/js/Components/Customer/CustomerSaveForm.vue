@@ -1,9 +1,11 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, computed } from "vue";
 import { useForm, usePage, router, Link } from "@inertiajs/vue3";
 import { createToaster } from "@meforma/vue-toaster";
 const toaster = createToaster({});
 const page = usePage();
+
+const errors = computed(() => page.props.flash.error || {});
 const status = reactive({
     title: "Create Party",
     buttonTitle: "Create Party",
@@ -33,20 +35,16 @@ if (id !== 0 && list !== null) {
 }
 
 const submitForm = () => {
-    if (form.name == "") {
-        toaster.error("Name is required");
-    } else {
-        form.post(URL, {
-            preserveScroll: true,
-            onSuccess: () => {
-                if (page.props.flash.status === true) {
-                    setTimeout(() => {
-                        router.get("/customer-page");
-                    }, 500);
-                }
-            },
-        });
-    }
+    form.post(URL, {
+        preserveScroll: true,
+        onSuccess: () => {
+            if (page.props.flash.status === true) {
+                setTimeout(() => {
+                    router.get("/customer-page");
+                }, 500);
+            }
+        },
+    });
 };
 </script>
 
@@ -65,6 +63,7 @@ const submitForm = () => {
                 </Link>
             </div>
             <h4 class="text-2xl font-bold mb-6">{{ status.title }}</h4>
+            
             <div class="mb-4">
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
@@ -79,6 +78,9 @@ const submitForm = () => {
                     name="name"
                 />
                 <input type="text" v-model="form.id" hidden name="id" />
+                <p v-if="errors.name" class="text-red-500 mt-2 text-sm">
+                    {{ errors.name[0] }}
+                </p>
             </div>
             <div class="mb-4">
                 <label

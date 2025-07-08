@@ -6,26 +6,6 @@ const props = defineProps({
     customer: Object,
 });
 
-function formatNumberWithCommas(amount) {
-    if (!amount) return '0';
-
-    const num = Math.abs(amount).toString();
-
-    if (num.length > 3) {
-        const lastThreeDigits = num.slice(-3);
-        let otherNumbers = num.slice(0, num.length - 3);
-        let formatted = '';
-        while (otherNumbers.length > 2) {
-
-            formatted = ',' + otherNumbers.slice(-2) + formatted;
-            otherNumbers = otherNumbers.slice(0, otherNumbers.length - 2);
-        }
-        formatted = otherNumbers + formatted;
-        return (amount < 0 ? '-' : '') + formatted + ',' + lastThreeDigits;
-    }
-    return (amount < 0 ? '-' : '') + num;
-}
-
 const emit = defineEmits(["update:show"]);
 
 const printInvoice = () => {
@@ -39,6 +19,12 @@ const printInvoice = () => {
 };
 
 
+const formatNumber = (value) => {
+    return new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value ?? 0);
+};
 </script>
 
 <template>
@@ -53,7 +39,16 @@ const printInvoice = () => {
                 <div class="flex justify-between mb-4">
                     <div class="mt-4">
                         <h1 class="text-xl font-bold">Work Order</h1>
-                        <p>Date: {{ props.customer.created_at?new Date(props.customer.created_at).toLocaleDateString():"" }}</p>
+                        <p>
+                            Date:
+                            {{
+                                props.customer.created_at
+                                    ? new Date(
+                                          props.customer.created_at
+                                      ).toLocaleDateString()
+                                    : ""
+                            }}
+                        </p>
                     </div>
                     <div class="font-bold">
                         <img
@@ -95,18 +90,14 @@ const printInvoice = () => {
                 >
                     <thead>
                         <tr class="border border-black">
-                            <th class="p-2 border border-black text-left">
-                                SL
-                            </th>
+                            <th class="p-2 border border-black text-left">SL</th>
                             <th class="p-2 border border-black text-left">
                                 Product Description
                             </th>
                             <th class="p-2 border border-black text-left">
                                 Weight
                             </th>
-                            <th class="p-2 border border-black text-left">
-                                Size
-                            </th>
+                            <th class="p-2 border border-black text-left">Size</th>
                             <th class="p-2 border border-black text-left">
                                 Qty/Pcs
                             </th>
@@ -117,8 +108,7 @@ const printInvoice = () => {
                     </thead>
                     <tbody>
                         <tr
-                            v-for="(product, index) in props.customer
-                                .invoice_products"
+                            v-for="(product, index) in props.customer.invoice_products"
                             :key="index"
                             class="border border-black"
                         >
@@ -153,9 +143,7 @@ const printInvoice = () => {
                         >
                             Total Order By Kg:
                             <strong>{{
-                                formatNumberWithCommas(
-                                    props.customer.total_by_kg
-                                )
+                                formatNumber(props.customer.total_by_kg)
                             }}</strong>
                             Kg
                         </button>
@@ -166,9 +154,7 @@ const printInvoice = () => {
                         >
                             Total Order By Pcs:
                             <strong>{{
-                                formatNumberWithCommas(
-                                    props.customer.total_by_pc
-                                )
+                                formatNumber(props.customer.total_by_pc)
                             }}</strong>
                             Pcs
                         </button>

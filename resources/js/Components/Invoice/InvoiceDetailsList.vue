@@ -11,24 +11,6 @@ const props = defineProps({
 const fromDate = new Date(page.props.fromDate).toLocaleString().split(",")[0];
 const toDate = new Date(page.props.toDate).toLocaleString().split(",")[0];
 
-function formatNumberWithCommas(amount) {
-    if (!amount) return "0";
-
-    const num = Math.abs(amount).toString();
-
-    if (num.length > 3) {
-        const lastThreeDigits = num.slice(-3);
-        let otherNumbers = num.slice(0, num.length - 3);
-        let formatted = "";
-        while (otherNumbers.length > 2) {
-            formatted = "," + otherNumbers.slice(-2) + formatted;
-            otherNumbers = otherNumbers.slice(0, otherNumbers.length - 2);
-        }
-        formatted = otherNumbers + formatted;
-        return (amount < 0 ? "-" : "") + formatted + "," + lastThreeDigits;
-    }
-    return (amount < 0 ? "-" : "") + num;
-}
 
 const emit = defineEmits(["update:show"]);
 
@@ -180,7 +162,7 @@ const printInvoice = () => {
                                     class="border px-2 py-1 text-center whitespace-normal break-words"
                                     style="width: 90px"
                                 >
-                                    {{ formatNumberWithCommas(product.qty_by_pc) }}
+                                    {{ product.qty_by_pc }}
                                 </td>
                                 <td
                                     class="border px-2 py-1 text-center whitespace-normal break-words"
@@ -192,7 +174,7 @@ const printInvoice = () => {
                                     class="border px-2 py-1 text-center whitespace-normal break-words"
                                     style="width: 100px"
                                 >
-                                    {{ formatNumberWithCommas(product.order_price) }}
+                                    {{ product.order_price}}
                                 </td>
                             </tr>
                         </tbody>
@@ -205,9 +187,9 @@ const printInvoice = () => {
                     >
                         Total Amount:
                         <strong>{{
-                            formatNumberWithCommas(
+
                                 page.props.total
-                            )
+
                         }}</strong>
                         BDT
                     </button>
