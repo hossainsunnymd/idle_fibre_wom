@@ -1,8 +1,10 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive,computed } from 'vue';
 import { useForm, usePage, router, Link } from '@inertiajs/vue3';
 import { createToaster } from "@meforma/vue-toaster";
 const toaster = createToaster({});
+
+const errors = computed(() => page.props.flash.error || {});
 const page = usePage();
 const status = reactive({
   title: 'Create User',
@@ -44,7 +46,7 @@ const submitForm = () => {
             router.get("/user-page");
           }, 500);
         }
-        else {
+        else if(page.props.flash.status === false){
           toaster.error(page.props.flash.message)
         }
       }
@@ -73,7 +75,7 @@ const submitForm = () => {
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
         />
         <input type="hidden" v-model="form.id" name="id" />
-        <p v-if="form.errors.name" class="text-red-600 text-xs mt-1">{{ form.errors.name }}</p>
+        <p v-if="errors.name" class="text-red-600 text-xs mt-1">{{ errors.name[0] }}</p>
       </div>
 
       <div class="mb-5">
@@ -84,7 +86,7 @@ const submitForm = () => {
           type="email"
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white"
         />
-        <p v-if="form.errors.email" class="text-red-600 text-xs mt-1">{{ form.errors.email }}</p>
+        <p v-if="errors.email" class="text-red-600 text-xs mt-1">{{ errors.email[0] }}</p>
       </div>
 
       <div class="mb-5">
@@ -95,7 +97,7 @@ const submitForm = () => {
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
 
         />
-        <p v-if="form.errors.mobile" class="text-red-600 text-xs mt-1">{{ form.errors.mobile }}</p>
+        <p v-if="errors.mobile" class="text-red-600 text-xs mt-1">{{ errors.mobile[0] }}</p>
       </div>
 
       <div class="mb-5">
@@ -105,7 +107,7 @@ const submitForm = () => {
           type="password"
           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
         />
-        <p v-if="form.errors.password" class="text-red-600 text-xs mt-1">{{ form.errors.password }}</p>
+        <p v-if="errors.password" class="text-red-600 text-xs mt-1">{{ errors.password[0] }}</p>
       </div>
 
       <div class="mb-6">
@@ -117,7 +119,7 @@ const submitForm = () => {
           <option value="" disabled>Select role</option>
           <option value="admin">Admin</option>
         </select>
-        <p v-if="form.errors.role" class="text-red-600 text-xs mt-1">{{ form.errors.role }}</p>
+        <p v-if="errors.role" class="text-red-600 text-xs mt-1">{{ errors.role[0] }}</p>
       </div>
 
       <button
