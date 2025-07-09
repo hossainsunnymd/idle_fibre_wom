@@ -6,12 +6,10 @@ import { createToaster } from "@meforma/vue-toaster";
 import InvoiceDetailsList from "./InvoiceDetailsList.vue";
 
 const toaster = createToaster({});
-
-const show = ref(false);
 const customer = ref();
 const page = usePage();
-
 const detail=ref(false);
+const show = ref(false);
 
 const searchValue = ref("");
 const searchField = ref(["customer.name", "id"]);
@@ -53,8 +51,8 @@ const showAllDetails = () => {
 const fromDate = new URLSearchParams(window.location.search).get("fromDate");
 const toDate = new URLSearchParams(window.location.search).get("toDate");
 const searchForm = ref({
-  fromDate: fromDate ? fromDate : "",
-  toDate: toDate ? toDate : "",
+  fromDate: fromDate ,
+  toDate: toDate ,
   customerId: "",
 });
 
@@ -77,7 +75,7 @@ const formatDate = (date) => {
     </div>
 
     <InvoiceDetails v-model:show="show" :customer="customer" />
-    <InvoiceDetailsList v-model:show="detail" :items="items" />
+    <InvoiceDetailsList v-model:detail="detail" :items="items" />
 
     <div class="flex flex-wrap gap-2 mb-4">
       <input

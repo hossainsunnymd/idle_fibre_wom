@@ -5,14 +5,14 @@ import { usePage } from "@inertiajs/vue3";
 const page = usePage();
 
 const props = defineProps({
-    show: Boolean,
+    detail: Boolean,
     items: Array,
 });
 const fromDate = new Date(page.props.fromDate).toLocaleString().split(",")[0];
 const toDate = new Date(page.props.toDate).toLocaleString().split(",")[0];
 
 
-const emit = defineEmits(["update:show"]);
+const emit = defineEmits(["update:detail"]);
 
 const printInvoice = () => {
     const printContent = document.getElementById("print-invoice").innerHTML;
@@ -27,7 +27,7 @@ const printInvoice = () => {
 
 <template>
     <div
-        v-if="show"
+        v-if="detail"
         class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 z-50"
     >
         <div class="bg-white border rounded-lg shadow-lg p-6 w-[1100px]">
@@ -204,9 +204,7 @@ const printInvoice = () => {
                     >
                         Total Order By Piece:
                         <strong>{{
-                            formatNumberWithCommas(
-                                parseInt(page.props.totalByPc)
-                            )
+                               page.props.totalByPc
                         }}</strong>
                         Pcs
                     </button>
@@ -216,7 +214,7 @@ const printInvoice = () => {
             <!-- Action Buttons (Hidden in Print) -->
             <div class="print-hide flex justify-between mt-6">
                 <button
-                    @click="$emit('update:show', false)"
+                    @click="$emit('update:detail', false)"
                     class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
                 >
                     Close
